@@ -12,6 +12,9 @@
     },
     "relay": {
       "enabled": false
+    },
+    "browserTools": {
+      "enabled": true
     }
   },
   "app": {
