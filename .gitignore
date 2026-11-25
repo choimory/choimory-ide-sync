@@ -22,6 +22,9 @@ desktop.ini
 paseo/*
 !paseo/config.json
 !paseo/desktop-settings.json
+# 직접 만든 플러그인 소스 (로컬 경로로 설치해서 사용)
+!paseo/plugins/
+paseo/plugins/**/node_modules/
 
 # 비밀값 / 기기별 파일 (어느 경로에 있든 차단)
 daemon-keypair.json

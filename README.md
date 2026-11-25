@@ -18,7 +18,23 @@
 | `paseo/config.json` | `~/.paseo/config.json` | 데몬 설정 (listen 주소, MCP 주입, CORS, relay 등) |
 | `paseo/desktop-settings.json` | `%APPDATA%/Paseo/desktop-settings.json` | 데스크톱 앱 설정 (릴리스 채널, 알림, 데몬 관리) |
 
-`.gitignore`에서 `paseo/` 폴더는 허용 목록 방식이라 위 두 파일 외에는 추적되지 않음.
+`.gitignore`에서 `paseo/` 폴더는 허용 목록 방식이라 위 두 파일과 `paseo/plugins/` 외에는 추적되지 않음.
+
+### 플러그인
+
+| 경로 | 내용 |
+|---|---|
+| `paseo/plugins/sidemenu-kanban` | 사이드바 **칸반(Kanban)** 메뉴. 모든 워크스페이스를 상태별(입력 대기/확인 필요/실행 중/실패/완료)로 표시 |
+| `paseo/plugins/sidemenu-map` | 사이드바 **맵(Map)** 메뉴. 워크스페이스와 에이전트 트리를 프로젝트별로 묶고, 프로젝트는 커스텀 그룹(맵의 "그룹 편집") 또는 상위 디렉토리별로 묶어 표시. 커스텀 그룹은 데몬의 플러그인 설정에 저장됨(저장소에는 없음) |
+
+새 기기에서 설치 (데몬 `config.json`의 `pluginsEnabled: true` 필요):
+
+```bash
+paseo plugin install <이 저장소 절대경로>/paseo/plugins/sidemenu-kanban
+paseo plugin install <이 저장소 절대경로>/paseo/plugins/sidemenu-map
+# 소스 수정 후
+paseo plugin reload <플러그인 id>
+```
 
 ### 제외 대상 (올리면 안 됨)
 

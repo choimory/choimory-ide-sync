@@ -16,5 +16,13 @@
   },
   "app": {
     "baseUrl": "https://app.paseo.sh"
+  },
+  "pluginsEnabled": true,
+  "plugins": {
+    "workspace-kanban": {
+      "source": "directory",
+      "path": "C:\\Users\\choim\\choimory_workspace\\IdeaProjects\\choimory\\choimory-ide-sync\\paseo\\plugins\\workspace-kanban",
+      "enabled": true
+    }
   }
 }
