@@ -110,7 +110,6 @@ function makeStyles(theme: PluginTheme, compact: boolean) {
     metaText: { color: c.foregroundMuted, fontSize: 11 },
     added: { color: c.statusSuccess, fontSize: 11 },
     removed: { color: c.statusDanger, fontSize: 11 },
-    label: { fontSize: 11 },
   };
 }
 
@@ -138,7 +137,6 @@ function WorkspaceCard({
     project: w.projectDisplayName,
     branch: w.branch,
     statusEnteredAt: w.statusEnteredAt,
-    indicatorLabel: w.indicatorLabel,
     additions: w.diffStat?.additions ?? 0,
     deletions: w.diffStat?.deletions ?? 0,
   }));
@@ -171,11 +169,6 @@ function WorkspaceCard({
         {card.project}
         {card.branch ? ` · ${card.branch}` : ""}
       </Text>
-      {card.indicatorLabel ? (
-        <Text style={[styles.label, { color: column.color(theme) }]} numberOfLines={2}>
-          {card.indicatorLabel}
-        </Text>
-      ) : null}
       <View style={styles.cardMeta}>
         {elapsed ? <Text style={styles.metaText}>{elapsed}</Text> : null}
         {agents.length > 0 ? (

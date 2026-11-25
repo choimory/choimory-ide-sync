@@ -112,7 +112,6 @@ function makeStyles(theme: PluginTheme, compact: boolean) {
     },
     pressed: { backgroundColor: c.surface2 },
     wsTitle: { color: c.foreground, fontSize: 13, fontWeight: "600" as const },
-    wsLabel: { fontSize: 11 },
     meta: { flexDirection: "row" as const, flexWrap: "wrap" as const, alignItems: "center" as const, gap: 6 },
     metaText: { color: c.foregroundMuted, fontSize: 11 },
     added: { color: c.statusSuccess, fontSize: 11 },
@@ -248,7 +247,6 @@ function WorkspaceNode({ workspaceRef, ctx }: { workspaceRef: WorkspaceRef; ctx:
     title: w.title ?? w.name,
     branch: w.branch,
     indicator: w.indicator,
-    indicatorLabel: w.indicatorLabel,
     statusEnteredAt: w.statusEnteredAt,
     additions: w.diffStat?.additions ?? 0,
     deletions: w.diffStat?.deletions ?? 0,
@@ -300,11 +298,6 @@ function WorkspaceNode({ workspaceRef, ctx }: { workspaceRef: WorkspaceRef; ctx:
           {ws.additions > 0 ? <Text style={styles.added}>+{ws.additions}</Text> : null}
           {ws.deletions > 0 ? <Text style={styles.removed}>−{ws.deletions}</Text> : null}
         </View>
-        {ws.indicatorLabel ? (
-          <Text style={[styles.wsLabel, { color }]} numberOfLines={2}>
-            {ws.indicatorLabel}
-          </Text>
-        ) : null}
       </Pressable>
       {roots.length > 0 ? (
         <View style={styles.agents}>
