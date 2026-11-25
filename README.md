@@ -7,6 +7,11 @@
   - [플러그인](#플러그인)
   - [제외 대상 (올리면 안 됨)](#제외-대상-올리면-안-됨)
   - [주의사항](#주의사항)
+- [Brewfile](#brewfile)
+  - [파일 구성](#파일-구성)
+  - [새 기기에서 설치](#새-기기에서-설치)
+  - [갱신](#갱신)
+  - [Brewfile 주의사항](#brewfile-주의사항)
 
 ---
 
@@ -84,3 +89,84 @@ paseo plugin ls   # 둘 다 running 이면 OK
 - 플러그인을 설치하면 `~/.paseo/config.json`에 `plugins` 항목(기기별 절대경로)이 추가됨. 저장소로 옮길 때는 **`plugins` 항목을 빼고** 커밋하고, 저장소 파일을 기기에 덮어쓴 경우엔 플러그인을 다시 설치.
 - `browserTools`가 켜져 있으면 에이전트가 Paseo 데스크톱 앱의 브라우저 탭(쿠키·로그인 공유)을 조작할 수 있음. 데스크톱 앱 실행 중에만 동작. 앱 **Settings → 호스트 → Agents**의 "Enable Paseo tools"도 켜져 있어야 하며, 켠 뒤 새로 연 에이전트부터 적용. 사용 예: "localhost:3000 열어서 스크린샷 찍고 콘솔 에러 확인해줘".
 - 플러그인은 샌드박스 없이 실행되는 신뢰 코드 (`pluginsEnabled: true`). 직접 만든/검토한 플러그인만 설치.
+
+---
+
+## Brewfile
+
+macOS Homebrew 패키지 목록. [`brew bundle`](https://docs.brew.sh/Brew-Bundle-and-Brewfile)로 설치/관리.
+
+### 파일 구성
+
+| 저장소 경로 | 용도 | 내용 |
+|---|---|---|
+| `brewfile/Brewfile.personal` | 개인 Mac | 현재 개인 Mac 전체 (`brew bundle dump` 결과 그대로) |
+| `brewfile/Brewfile.work` | 회사 Mac | 개인용에서 회사에서 안 쓰는 항목을 뺀 목록 |
+
+```mermaid
+flowchart LR
+    Mac["개인 Mac<br/>설치된 패키지"] -- "brew bundle dump" --> P["Brewfile.personal"]
+    P -- "복사 후 항목 정리" --> W["Brewfile.work"]
+    P -- "brew bundle --file" --> NP["새 개인 Mac"]
+    W -- "brew bundle --file" --> NW["회사 Mac"]
+```
+
+항목 종류:
+
+| 키워드 | 의미 |
+|---|---|
+| `tap` | 서드파티 저장소 추가 (예: `codingnoye/tap` → `gksdud` 한영 전환 앱) |
+| `brew` | CLI 패키지 (formula) |
+| `cask` | GUI 앱 |
+| `vscode` | VS Code 확장 (`visual-studio-code` cask 설치 후 적용) |
+| `npm` | 전역 npm 패키지 (Node 필요) |
+
+`Brewfile.work`에서 개인용과 다른 점:
+- formula는 `git-flow`, `gradle`, `nvm`, `openjdk`만 유지 (`graphviz`, `python@3.13` 제외, `openjdk@17` → `openjdk`)
+- cask에서 `cmux`, `iina`, `steam`, `spotify` 제외
+- `npm "corepack"` 제외 (설치 시점에 Node가 없어 실패하므로)
+
+### 새 기기에서 설치
+
+파일명은 그대로 두고 `--file`로 지정.
+
+```bash
+brew bundle --file=brewfile/Brewfile.work       # 회사
+brew bundle --file=brewfile/Brewfile.personal   # 개인
+brew bundle check --file=brewfile/Brewfile.work # 설치 누락 확인
+```
+
+매번 `--file` 지정이 번거로우면 (선택):
+
+```bash
+# 방법 1) 환경변수 (~/.zshrc) → `brew bundle` 만으로 실행
+export HOMEBREW_BUNDLE_FILE=<이 저장소 절대경로>/brewfile/Brewfile.work
+
+# 방법 2) 홈에 심볼릭 링크 → `brew bundle --global` 로 실행 (git pull 시 바로 반영)
+ln -s <이 저장소 절대경로>/brewfile/Brewfile.work ~/.Brewfile
+```
+
+설치 후 추가 설정:
+- `nvm`: `mkdir ~/.nvm` 후 `~/.zshrc`에 로드 스크립트 추가 (`brew info nvm`의 Caveats 참고).
+- `openjdk`: keg-only라 시스템 `java`로 자동 연결되지 않음. 터미널에서 쓰려면 `brew info openjdk`의 Caveats대로 심볼릭 링크 또는 `JAVA_HOME`/`PATH` 설정. IntelliJ에서만 쓰면 IDE에서 JDK 경로 지정.
+
+### 갱신
+
+```bash
+# 개인 Mac: 현재 설치 상태로 덮어쓰기
+brew bundle dump --force --file=brewfile/Brewfile.personal
+
+# 회사용: dump로 덮어쓰면 정리한 내용이 사라지므로 직접 편집
+```
+
+Brewfile에 없는 패키지 정리 (주의: 삭제됨):
+
+```bash
+brew bundle cleanup --file=brewfile/Brewfile.work          # 삭제 대상 미리보기
+brew bundle cleanup --force --file=brewfile/Brewfile.work  # 실제 삭제
+```
+
+### Brewfile 주의사항
+- `openjdk@24`처럼 Homebrew에 없는 버전을 적으면 해당 줄에서 설치가 실패함. 사용 가능한 버전은 `brew search openjdk`로 확인.
+- `gradle`은 `openjdk`(최신)에 의존하므로 버전 지정 JDK를 따로 넣어도 최신 JDK가 함께 설치됨.
+- 각 항목 위의 `#` 주석은 `brew bundle dump`가 자동으로 붙인 패키지 설명.
