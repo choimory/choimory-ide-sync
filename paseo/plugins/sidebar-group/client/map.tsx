@@ -14,6 +14,8 @@ import { Icon, Modal, ScrollView, TextInput } from "@getpaseo/plugin/client/ui";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { type MapGroup, mapSettings } from "../shared/settings";
+import { ArchiveButton } from "./archive-button";
+import { WorkspaceMenuButton } from "./workspace-menu";
 import { COLUMNS } from "./columns";
 import { type Translate, formatElapsed, indicatorColor, useNow } from "./format";
 import { type MapProject, type MapSection, assignProject, buildSections, customGroupOf, projectGroupKey } from "./grouping";
@@ -111,6 +113,7 @@ function makeStyles(theme: PluginTheme, compact: boolean) {
       backgroundColor: c.surface0,
     },
     pressed: { backgroundColor: c.surface2 },
+    wsHeader: { flexDirection: "row" as const, alignItems: "flex-start" as const, gap: 6 },
     wsTitle: { color: c.foreground, fontSize: 13, fontWeight: "600" as const },
     meta: { flexDirection: "row" as const, flexWrap: "wrap" as const, alignItems: "center" as const, gap: 6 },
     metaText: { color: c.foregroundMuted, fontSize: 11 },
@@ -158,6 +161,8 @@ interface MapContext {
   readonly navigation: PluginScreenProps["navigation"];
   readonly showBackground: boolean;
   readonly editing: boolean;
+  readonly screenHostId: string;
+  readonly canOpenFolder: boolean;
   onMove(project: MapProject): void;
 }
 
@@ -288,9 +293,18 @@ function WorkspaceNode({ workspaceRef, ctx }: { workspaceRef: WorkspaceRef; ctx:
         onPress={open}
         style={({ pressed }) => [{ gap: 3, borderRadius: 6 }, pressed && styles.pressed]}
       >
-        <Text style={styles.wsTitle} numberOfLines={2}>
-          {ws.title}
-        </Text>
+        <View style={styles.wsHeader}>
+          <Text style={[styles.wsTitle, { flex: 1 }]} numberOfLines={2}>
+            {ws.title}
+          </Text>
+          <ArchiveButton workspaceRef={workspaceRef} title={ws.title} theme={theme} />
+          <WorkspaceMenuButton
+            workspaceRef={workspaceRef}
+            theme={theme}
+            screenHostId={ctx.screenHostId}
+            canOpenFolder={ctx.canOpenFolder}
+          />
+        </View>
         <View style={styles.meta}>
           <Text style={[styles.metaText, { color }]}>{t(`columns.${ws.indicator}`)}</Text>
           {ws.branch ? <Text style={styles.metaText}>⎇ {ws.branch}</Text> : null}
@@ -451,7 +465,7 @@ function MoveModal({
   );
 }
 
-export function MapScreen({ theme, layout, navigation }: PluginScreenProps) {
+export function MapScreen({ theme, layout, navigation, host }: PluginScreenProps) {
   const compact = layout.compact;
   const styles = useMemo(() => makeStyles(theme, compact), [theme, compact]);
   const { t } = useTranslation(messages);
@@ -503,6 +517,8 @@ export function MapScreen({ theme, layout, navigation }: PluginScreenProps) {
     navigation,
     showBackground,
     editing,
+    screenHostId: host.id,
+    canOpenFolder: layout.platform === "web",
     onMove: setMoving,
   };
 

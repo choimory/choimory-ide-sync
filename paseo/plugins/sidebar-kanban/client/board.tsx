@@ -10,11 +10,17 @@ import {
 import { Icon, ScrollView } from "@getpaseo/plugin/client/ui";
 import { useMemo, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import { ArchiveButton } from "./archive-button";
+import { WorkspaceMenuButton } from "./workspace-menu";
 import { COLUMNS, type KanbanColumn } from "./columns";
 import { formatElapsed, useNow } from "./format";
 import { messages } from "./messages";
 
 type Navigation = PluginScreenProps["navigation"];
+interface MenuHost {
+  screenHostId: string;
+  canOpenFolder: boolean;
+}
 
 const ALL_PROJECTS = "__all__";
 
@@ -98,6 +104,7 @@ function makeStyles(theme: PluginTheme, compact: boolean) {
       backgroundColor: c.surface0,
     },
     cardPressed: { backgroundColor: c.surface2 },
+    cardHeader: { flexDirection: "row" as const, alignItems: "flex-start" as const, gap: 6 },
     cardTitle: { color: c.foreground, fontSize: 13, fontWeight: "600" as const },
     cardProject: { color: c.foregroundMuted, fontSize: 12 },
     cardMeta: {
@@ -122,6 +129,7 @@ function WorkspaceCard({
   theme,
   now,
   navigation,
+  menuHost,
 }: {
   workspaceRef: WorkspaceRef;
   column: KanbanColumn;
@@ -129,6 +137,7 @@ function WorkspaceCard({
   theme: PluginTheme;
   now: number;
   navigation: Navigation;
+  menuHost: MenuHost;
 }) {
   const card = useWorkspace(workspaceRef, (w) => ({
     id: w.id,
@@ -162,9 +171,13 @@ function WorkspaceCard({
       onPress={open}
       style={({ pressed }) => [styles.card, pressed && styles.cardPressed]}
     >
-      <Text style={styles.cardTitle} numberOfLines={2}>
-        {card.title}
-      </Text>
+      <View style={styles.cardHeader}>
+        <Text style={[styles.cardTitle, { flex: 1 }]} numberOfLines={2}>
+          {card.title}
+        </Text>
+        <ArchiveButton workspaceRef={workspaceRef} title={card.title} theme={theme} />
+        <WorkspaceMenuButton workspaceRef={workspaceRef} theme={theme} {...menuHost} />
+      </View>
       <Text style={styles.cardProject} numberOfLines={1}>
         {card.project}
         {card.branch ? ` · ${card.branch}` : ""}
@@ -189,6 +202,7 @@ function Column({
   now,
   navigation,
   compact,
+  menuHost,
 }: {
   column: KanbanColumn;
   items: readonly WorkspaceRef[];
@@ -197,6 +211,7 @@ function Column({
   now: number;
   navigation: Navigation;
   compact: boolean;
+  menuHost: MenuHost;
 }) {
   const color = column.color(theme);
   const { t } = useTranslation(messages);
@@ -214,6 +229,7 @@ function Column({
             theme={theme}
             now={now}
             navigation={navigation}
+            menuHost={menuHost}
           />
         ))
       )}
@@ -231,7 +247,11 @@ function Column({
   );
 }
 
-export function KanbanScreen({ theme, layout, navigation }: PluginScreenProps) {
+export function KanbanScreen({ theme, layout, navigation, host }: PluginScreenProps) {
+  const menuHost = useMemo(
+    () => ({ screenHostId: host.id, canOpenFolder: layout.platform === "web" }),
+    [host.id, layout.platform],
+  );
   const compact = layout.compact;
   const styles = useMemo(() => makeStyles(theme, compact), [theme, compact]);
   const now = useNow(30_000);
@@ -269,6 +289,7 @@ export function KanbanScreen({ theme, layout, navigation }: PluginScreenProps) {
       now={now}
       navigation={navigation}
       compact={compact}
+      menuHost={menuHost}
     />
   ));
 

@@ -3,12 +3,12 @@ import { SidebarRow } from "@getpaseo/plugin/client/ui";
 import { MapScreen } from "./client/map";
 import { messages } from "./client/messages";
 
-const SCREEN_ID = "map";
+const SCREEN_ID = "groups";
 
-function MapSidebarItem({ currentScreen, openScreen }: PluginSidebarItemProps) {
+function GroupsSidebarItem({ currentScreen, openScreen }: PluginSidebarItemProps) {
   return (
     <SidebarRow
-      icon="Map"
+      icon="LayoutGrid"
       active={currentScreen?.screenId === SCREEN_ID}
       onPress={() => openScreen({ screenId: SCREEN_ID })}
     />
@@ -20,13 +20,13 @@ export default function contribute(client: PluginClientContext) {
   client.addSidebarHeaderItem({
     id: SCREEN_ID,
     title: messages.message("title"),
-    Component: MapSidebarItem,
+    Component: GroupsSidebarItem,
   });
   client.addCommandCenterItem({
-    id: "open-map",
+    id: "open-groups",
     title: messages.message("open"),
-    icon: "Map",
-    keywords: ["map", "project", "group", "workspace", "맵", "프로젝트"],
+    icon: "LayoutGrid",
+    keywords: ["groups", "group", "project", "workspace", "그룹", "프로젝트"],
     context: "global",
     onSelect({ openScreen }) {
       openScreen({ screenId: SCREEN_ID });
