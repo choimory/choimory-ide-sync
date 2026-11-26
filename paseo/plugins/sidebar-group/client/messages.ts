@@ -56,7 +56,6 @@ export const messages = defineTranslations({
       },
       archive: {
         label: "Archive",
-        confirm: "Archive?",
         failed: "Could not archive {{title}}: {{error}}",
       },
       elapsed: {
@@ -120,7 +119,6 @@ export const messages = defineTranslations({
       },
       archive: {
         label: "보관",
-        confirm: "보관?",
         failed: "{{title}} 보관 실패: {{error}}",
       },
       elapsed: {
